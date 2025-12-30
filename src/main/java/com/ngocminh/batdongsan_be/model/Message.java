@@ -38,6 +38,13 @@ public class Message {
     private LocalDateTime sentAt;
     private LocalDateTime readAt;
 
+    @ManyToOne
+    @JoinColumn(name = "propertyId")
+    private Property property;
+
+    private String propertyTitle;
+    private Double propertyPrice;
+    private String propertyImage;
 
     @PrePersist
     public void prePersist() {

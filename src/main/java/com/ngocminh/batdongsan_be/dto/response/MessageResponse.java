@@ -15,4 +15,10 @@ public class MessageResponse {
     private String content;
     private LocalDateTime sentAt;
     private LocalDateTime readAt;
+
+    private UUID propertyId;
+    private String propertyTitle;
+    private Double propertyPrice;
+    private String propertyImage;
+
 }

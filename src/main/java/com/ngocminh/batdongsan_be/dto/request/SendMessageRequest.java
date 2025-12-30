@@ -15,4 +15,5 @@ public class SendMessageRequest {
     private UUID senderId;
     private UUID receiverId;
     private String content;
+    private UUID propertyId;
 }

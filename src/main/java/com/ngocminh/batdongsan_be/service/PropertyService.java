@@ -388,7 +388,6 @@ public class PropertyService {
         LocalDate start;
         LocalDate end;
 
-        // Xác định khoảng thời gian
         if (day != null && month != null && year != null) {
             start = LocalDate.of(year, month, day);
             end = start.plusDays(1);
@@ -404,7 +403,6 @@ public class PropertyService {
             end = start.plusMonths(1);
         }
 
-        // ⭐ Convert sang LocalDateTime
         LocalDateTime startDt = start.atStartOfDay();
         LocalDateTime endDt = end.atStartOfDay();
 

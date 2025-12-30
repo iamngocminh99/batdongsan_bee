@@ -23,13 +23,16 @@ public class MessageController {
 
     // Gửi tin nhắn
     @PostMapping("/send")
-    public Message sendMessage(@RequestBody SendMessageRequest request) {
-        return messageService.sendMessage(
+    public MessageResponse sendMessage(@RequestBody SendMessageRequest request) {
+        Message msg = messageService.sendMessage(
                 request.getSenderId(),
                 request.getReceiverId(),
-                request.getContent()
+                request.getContent(),
+                request.getPropertyId()
         );
+        return messageService.toResponse(msg);
     }
+
 
     // Lấy toàn bộ lịch sử chat giữa 2 user
     @GetMapping("/conversation")
@@ -37,7 +40,6 @@ public class MessageController {
                                                  @RequestParam UUID user2Id) {
         return messageService.getConversation(user1Id, user2Id);
     }
-
 
     // những người đã nhắn tin
     @GetMapping("/partners/{userId}")
