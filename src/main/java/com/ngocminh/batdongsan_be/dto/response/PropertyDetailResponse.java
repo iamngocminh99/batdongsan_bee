@@ -15,6 +15,9 @@ public class PropertyDetailResponse {
     private String description;
     private Double price;
 
+    private Double latitude;
+    private Double longitude;
+
     private int bedrooms;
     private int bathrooms;
     private int livingRooms;

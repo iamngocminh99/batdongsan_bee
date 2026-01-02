@@ -10,13 +10,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -77,6 +77,8 @@ public class PropertyService {
                 .status(request.getStatus())
                 .floorAreaSqft(request.getFloorAreaSqft())
                 .landAreaSqft(request.getLandAreaSqft())
+                .latitude(request.getLatitude())
+                .longitude(request.getLongitude())
                 .user(user)
                 .favoriteCount(0)
                 .build();
@@ -113,7 +115,9 @@ public class PropertyService {
         return sb.toString();
     }
 
+    @Transactional
     public void updateWithFiles(UUID id, PropertyCreateRequest request) throws IOException {
+
         Property property = propertyRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Property not found"));
 
@@ -136,36 +140,33 @@ public class PropertyService {
         property.setFloorAreaSqft(request.getFloorAreaSqft());
         property.setLandAreaSqft(request.getLandAreaSqft());
         property.setDirection(request.getDirection());
+        property.setLatitude(request.getLatitude());
+        property.setLongitude(request.getLongitude());
 
-        if (request.getUserId() != null) {
-            User user = userRepository.findById(request.getUserId())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-            property.setUser(user);
-        }
-
-        Property saved = propertyRepository.save(property);
-
-        // Upload ảnh mới
         if (request.getFiles() != null && request.getFiles().length > 0) {
-            saved.getPropertyImages().clear();
 
-            List<PropertyImage> images = new ArrayList<>();
+            if (property.getPropertyImages() == null) {
+                property.setPropertyImages(new ArrayList<>());
+            }
+            for (PropertyImage img : property.getPropertyImages()) {
+                img.setProperty(null);
+            }
+            property.getPropertyImages().clear();
             for (MultipartFile file : request.getFiles()) {
-                if (file != null && !file.isEmpty()) {
+                if (!file.isEmpty()) {
                     String url = cloudinaryService.getImageUrlAfterUpload(file, "properties");
+
                     PropertyImage image = PropertyImage.builder()
-                            .property(saved)
+                            .property(property)
                             .url(url)
                             .type(PropertyImage.ImageType.IMAGE)
                             .build();
-                    images.add(image);
+
+                    property.getPropertyImages().add(image);
                 }
             }
-            saved.setPropertyImages(images);
-            propertyRepository.save(saved);
         }
     }
-
 
     public Page<PropertyResponse> search(
             String title, Property.PropertyType propertyType, Property.SaleType saleType, Property.Direction direction,
@@ -322,6 +323,8 @@ public class PropertyService {
                 .priceType(property.getPriceType())
                 .floorAreaSqft(property.getFloorAreaSqft())
                 .landAreaSqft(property.getLandAreaSqft())
+                .longitude(property.getLongitude())
+                .latitude(property.getLatitude())
                 .user(userResponse)
                 .imageUrls(imageUrls)
                 .build();
